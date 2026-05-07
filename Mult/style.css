@@ -1,0 +1,315 @@
+/* ---------- fonts ---------- */
+@font-face {
+  font-family: 'Augie';
+  src: url('fonts/augie.woff2') format('woff2'),
+       url('fonts/augie.woff') format('woff');
+  font-display: swap;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #000;
+  color: #fff;
+  font-family: 'Augie', system-ui, sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.opening {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Tsunami sits mid-left, vertically centered. */
+.tsunami {
+  position: absolute;
+  top: 50%;
+  left: 4vw;
+  transform: translateY(-50%);
+  width: clamp(280px, 38vw, 580px);
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.6));
+  pointer-events: none;
+}
+
+/* SVG covers the whole viewport; the callout group is drawn in
+   user coords inside a 1000x1000 viewBox (preserveAspectRatio meet). */
+.callout-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.callout path.bubble {
+  fill: #ffffff;
+  stroke: #000000;
+  stroke-width: 4;
+  stroke-linejoin: round;
+}
+
+.callout .bubble-text {
+  font-family: 'Augie', system-ui, sans-serif;
+  font-size: 31px;
+  line-height: 1.35;
+  color: #000;
+  padding: 22px 28px;
+  text-align: center;
+  word-wrap: break-word;
+  /* Center text vertically and horizontally within the bubble. */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+/* First callout: text 20% bigger than the rest, bubble unchanged. */
+.callout .bubble-text.big {
+  font-size: 37px;
+}
+
+/* Callout group accepts clicks (skips the timer). */
+.callout {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* Callout 1 blinks red ↔ black. We toggle a class on the text. */
+.callout .bubble-text.angry-red { color: #d6453d; }
+
+/* The cdot-separated STUPID. */
+.cdot {
+  display: inline;
+  letter-spacing: 0;
+}
+
+/* Fade transition for callout swaps. */
+.callout.fading { opacity: 0; transition: opacity 0.25s ease; }
+.callout { opacity: 1; transition: opacity 0.25s ease; }
+
+/* Opening fades out when transitioning to the table. */
+.opening {
+  transition: opacity 0.6s ease;
+}
+.opening.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* End-of-opening "Help Tsunami" button — same look as Division splash. */
+.help-button {
+  position: absolute;
+  bottom: 6%;
+  right: 5%;
+  font-family: 'Augie', cursive;
+  font-size: clamp(16px, 2vw, 28px);
+  background: #ffffff;
+  color: #1c4878;
+  border: 2px solid #1c4878;
+  padding: 10px 22px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  box-shadow: 3px 3px 0 #1c4878;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.5s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+.help-button.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.help-button:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 #1c4878;
+}
+.help-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #1c4878;
+}
+.help-button:focus {
+  outline: 3px solid #ffd862;
+  outline-offset: 3px;
+}
+
+/* ====================================================================
+   TABLE APP — cream paper, graph grid, marker headers, wave emojis
+   ==================================================================== */
+
+.table-app {
+  position: fixed;
+  inset: 0;
+  background: #faf3e6;
+  color: #1c2a3a;
+  overflow: auto;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  /* notebook graph paper */
+  background-image:
+    linear-gradient(#e2d9c4 1px, transparent 1px),
+    linear-gradient(90deg, #e2d9c4 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-color: #faf3e6;
+}
+.table-app.shown { opacity: 1; }
+
+.table-app .page {
+  max-width: none;
+  margin: 0 auto;
+  padding: clamp(8px, 1.6vh, 20px) clamp(12px, 2vw, 28px);
+  position: relative;
+}
+
+.table-app .title {
+  font-family: 'Augie', cursive;
+  font-size: clamp(20px, 3.2vw, 36px);
+  text-align: center;
+  margin: 0 0 0.15em;
+  color: #1c2a3a;
+}
+
+.table-app .prompt {
+  font-family: 'Augie', cursive;
+  font-size: clamp(14px, 2vw, 22px);
+  text-align: center;
+  margin: 0 0 clamp(8px, 1.4vh, 18px);
+  color: #1c4878;
+  min-height: 1.4em;
+}
+
+.table-app .prompt.celebrate {
+  color: #3aa847;
+}
+
+.table-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.mult-table {
+  border-collapse: collapse;
+  font-family: 'Augie', cursive;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(28, 42, 58, 0.10);
+}
+
+.mult-table td,
+.mult-table th {
+  /* Scale with the smaller viewport dimension so 10×10 fits both
+     landscape (height-bound) and portrait (width-bound) screens. */
+  width:  clamp(36px, min(8.4vw, 8.4vh), 110px);
+  height: clamp(36px, min(8.4vw, 8.4vh), 110px);
+  text-align: center;
+  vertical-align: middle;
+  border: 1.5px solid #c9bfa6;
+  font-size: clamp(16px, min(3.2vw, 3.2vh), 38px);
+  padding: 0;
+  position: relative;
+}
+
+.mult-table th.corner {
+  background: transparent;
+  color: #b3a989;
+  font-size: clamp(18px, min(3.6vw, 3.6vh), 42px);
+  border: 1.5px solid #c9bfa6;
+}
+
+.mult-table th.col-header,
+.mult-table th.row-header {
+  cursor: pointer;
+  background: #fff8dc;
+  color: #1c2a3a;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background 0.18s ease, transform 0.08s ease;
+}
+.mult-table th.col-header:hover,
+.mult-table th.row-header:hover {
+  background: #fff09e;
+}
+.mult-table th.col-header.selected,
+.mult-table th.row-header.selected {
+  background: #ffd862;
+  color: #1c2a3a;
+  box-shadow: inset 0 0 0 3px #d6453d;
+}
+
+.mult-table td.cell {
+  color: #1c4878;
+}
+
+.mult-table td.cell.filled {
+  background: rgba(197, 237, 203, 0.55); /* mint highlighter */
+  color: #1c2a3a;
+  font-weight: 600;
+}
+
+.mult-table td.cell.wave {
+  color: transparent;     /* hide any prior content */
+  background: transparent; /* no blue fill — only the emoji */
+}
+.mult-table td.cell.wave::before {
+  content: "🌊";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: initial;
+  font-size: clamp(20px, min(4vw, 4vh), 46px);
+  animation: waveAppear 0.32s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+/* Column waves face down — rotate the emoji 90° clockwise. */
+.mult-table td.cell.wave.wave-col::before {
+  animation-name: waveAppearCol;
+}
+
+.mult-table td.cell.intersection {
+  background: #fff;
+  box-shadow: inset 0 0 0 3px #d6453d;
+}
+
+.prod-input {
+  width: 90%;
+  height: 70%;
+  border: none;
+  outline: none;
+  background: transparent;
+  text-align: center;
+  font-family: 'Augie', cursive;
+  font-size: clamp(18px, min(3.4vw, 3.4vh), 38px);
+  color: #d6453d;
+}
+
+.prod-input.wrong {
+  animation: shake 0.46s;
+}
+
+@keyframes waveAppear {
+  0%   { opacity: 0; transform: scale(0.35); }
+  60%  { opacity: 1; transform: scale(1.18); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes waveAppearCol {
+  0%   { opacity: 0; transform: rotate(90deg) scale(0.35); }
+  60%  { opacity: 1; transform: rotate(90deg) scale(1.18); }
+  100% { opacity: 1; transform: rotate(90deg) scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}

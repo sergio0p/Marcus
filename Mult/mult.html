@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Tsunami's Multiplication Table</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="opening" id="opening">
+    <img class="tsunami" id="tsunami" src="tsunami.png" alt="Tsunami the SeaWing" />
+
+    <svg class="callout-layer" id="callout-layer" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <defs>
+        <filter id="bubble-shadow" x="-10%" y="-10%" width="120%" height="120%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+          <feOffset dx="0" dy="3" result="offsetblur" />
+          <feComponentTransfer>
+            <feFuncA type="linear" slope="0.45" />
+          </feComponentTransfer>
+          <feMerge>
+            <feMergeNode />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <g id="callout" class="callout"></g>
+    </svg>
+
+    <button class="help-button" id="help-button" type="button">Help Tsunami →</button>
+  </div>
+
+  <div class="table-app" id="table-app" hidden>
+    <div class="page">
+      <h1 class="title">Tsunami's Multiplication Table</h1>
+      <p class="prompt" id="prompt">Okay Marcus — grab a number from the top row, then one from the side. Tsunami is counting on you!</p>
+      <div class="table-wrap">
+        <table class="mult-table" id="mult-table"></table>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
