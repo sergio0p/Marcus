@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Partial Quotients — Division Practice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@500;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="splash" id="splash" role="dialog" aria-label="Welcome from Clay">
+    <div class="splash-frame">
+      <div class="splash-text">
+        <p class="splash-name">Marcus,</p>
+        <p>my name is Clay and Starflight asked me to do lots of divisions.</p>
+        <p>But I'm scared of math and heard you are good at it.</p>
+        <p class="splash-cta">Will you help me?</p>
+      </div>
+      <button class="splash-dismiss" id="splash-dismiss" type="button">Help Clay →</button>
+    </div>
+  </div>
+
+  <div class="page">
+    <header class="topbar">
+      <h1 class="title">Division Practice</h1>
+      <div class="controls">
+        <label class="difficulty">
+          <span>Level</span>
+          <select id="difficulty" aria-label="Difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </label>
+        <button id="new-problem" class="btn-new" type="button">New problem</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <div class="problem-statement" aria-live="polite">
+        <span class="x" id="display-x">—</span>
+        <span class="op">÷</span>
+        <span class="y" id="display-y">—</span>
+      </div>
+
+      <div class="prompt" id="prompt" aria-live="polite"></div>
+
+      <div class="columns">
+        <section class="card stack-column" aria-label="Working">
+          <div class="card-tape" style="--tape-color: rgba(255, 220, 130, 0.7);"></div>
+          <div class="stack" id="stack"></div>
+          <div class="active-row" id="active-row"></div>
+        </section>
+
+        <section class="card quotient-column" aria-label="Partial quotients">
+          <div class="card-tape tape-left" style="--tape-color: rgba(190, 218, 242, 0.75);"></div>
+          <div class="quotient-label">partial quotients</div>
+          <div class="quotient-list" id="quotient-list"></div>
+          <div class="quotient-bar" id="quotient-bar" hidden></div>
+          <div class="quotient-total" id="quotient-total" hidden></div>
+        </section>
+      </div>
+
+    </main>
+
+    <footer class="footnote">
+      <span>Pick chunks you find easy, Marcus — take 'em out one at a time. Hit Enter ↵ when you've got an answer.</span>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
