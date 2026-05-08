@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Long Division Practice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@500;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <h1 class="title">Long Division</h1>
+      <div class="controls">
+        <label class="difficulty">
+          Difficulty
+          <select id="difficulty">
+            <option value="easy">easy</option>
+            <option value="medium" selected>medium</option>
+            <option value="hard">hard</option>
+          </select>
+        </label>
+        <button id="new-problem" class="btn-new" type="button">New problem</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <div class="problem-statement" aria-live="polite">
+        <span class="x" id="display-x">—</span>
+        <span class="op">÷</span>
+        <span class="y" id="display-y">—</span>
+      </div>
+
+      <div class="prompt" id="prompt" aria-live="polite"></div>
+
+      <div class="columns">
+        <section class="card stack-column" aria-label="Working">
+          <span class="card-tape tape-left"></span>
+          <div class="quotient-label">Steps</div>
+          <div class="stack" id="stack"></div>
+          <div class="active-row" id="active-row"></div>
+        </section>
+
+        <section class="card quotient-column" aria-label="Quotient so far">
+          <span class="card-tape"></span>
+          <div class="quotient-label">Quotient</div>
+          <div class="quotient-list" id="quotient-list"></div>
+          <div class="quotient-bar" id="quotient-bar" hidden></div>
+          <div class="quotient-total" id="quotient-total" hidden></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
