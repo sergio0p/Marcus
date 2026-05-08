@@ -423,7 +423,26 @@
   function initTable() {
     buildTable();
     document.getElementById('mult-table').addEventListener('click', onTableClick);
+    document.getElementById('btn-reset').addEventListener('click', onResetClick);
     subscribeProgress();
+  }
+
+  function onResetClick() {
+    if (tableState.filled.size === 0) return;
+    const ok = window.confirm("Start over, Marcus? This clears every answer Tsunami has so far.");
+    if (!ok) return;
+
+    tableState.filled.clear();
+    tableState.selectedRow = null;
+    tableState.selectedCol = null;
+
+    document.querySelectorAll('#mult-table td.cell').forEach(el => {
+      el.classList.remove('filled', 'wave', 'wave-col', 'intersection');
+      el.textContent = '';
+    });
+    updateHeaderHighlight();
+    setPrompt(`Fresh start, Marcus! Pick a top number and a side number to begin.`, '');
+    resetCloud();
   }
 
   /* ---------- Firestore sync (cross-device) ---------- */
@@ -436,6 +455,7 @@
   }
 
   function applyRemoteFilled(filled) {
+    // Add or update cells present in the remote payload.
     Object.keys(filled).forEach(k => {
       const v = filled[k];
       if (tableState.filled.get(k) === v) return;
@@ -445,6 +465,17 @@
       if (cell) {
         cell.classList.add('filled');
         cell.textContent = v;
+      }
+    });
+    // Remove any cells the remote no longer has (e.g. a reset elsewhere).
+    Array.from(tableState.filled.keys()).forEach(k => {
+      if (filled[k] != null) return;
+      tableState.filled.delete(k);
+      const [r, c] = k.split(',').map(Number);
+      const cell = cellEl(r, c);
+      if (cell) {
+        cell.classList.remove('filled');
+        cell.textContent = '';
       }
     });
     if (tableState.filled.size === N * N) {
@@ -474,6 +505,16 @@
         filled: obj,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       }, { merge: true }).catch(err => console.warn('[mult] save failed:', err));
+    });
+  }
+
+  function resetCloud() {
+    if (!window.MarcusApps || !MarcusApps.ready || !MarcusApps.db) return;
+    MarcusApps.ready.then(() => {
+      progressDoc().set({
+        filled: {},
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      }).catch(err => console.warn('[mult] reset failed:', err));
     });
   }
 })();

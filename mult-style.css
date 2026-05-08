@@ -190,6 +190,26 @@ html, body {
   color: #3aa847;
 }
 
+.btn-reset {
+  position: absolute;
+  top: clamp(8px, 1.6vh, 18px);
+  right: clamp(12px, 2vw, 24px);
+  font-family: 'Augie', cursive;
+  font-size: clamp(12px, 1.5vw, 16px);
+  background: #faf3e6;
+  color: #1c4878;
+  border: 2px dashed #1c4878;
+  padding: 4px 12px 3px;
+  border-radius: 10px;
+  cursor: pointer;
+  letter-spacing: 0.4px;
+  transition: transform 0.08s ease, background 0.12s ease;
+}
+
+.btn-reset:hover { background: #fff09e; transform: rotate(-1deg); }
+.btn-reset:active { transform: translateY(1px); }
+.btn-reset:focus { outline: 3px solid #ffd862; outline-offset: 2px; }
+
 .table-wrap {
   display: flex;
   justify-content: center;
