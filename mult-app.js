@@ -394,7 +394,7 @@
     updateHeaderHighlight();
 
     if (tableState.filled.size === N * N) {
-      setPrompt(pick(LINES.done), 'celebrate');
+      maybeCelebrate();
     } else {
       setPrompt(pick(LINES.correct)(r, c, v), 'celebrate');
     }
@@ -435,6 +435,7 @@
     tableState.filled.clear();
     tableState.selectedRow = null;
     tableState.selectedCol = null;
+    _celebrated = false;
 
     document.querySelectorAll('#mult-table td.cell').forEach(el => {
       el.classList.remove('filled', 'wave', 'wave-col', 'intersection');
@@ -478,9 +479,7 @@
         cell.textContent = '';
       }
     });
-    if (tableState.filled.size === N * N) {
-      setPrompt(pick(LINES.done), 'celebrate');
-    }
+    maybeCelebrate();
   }
 
   function subscribeProgress() {
@@ -516,5 +515,56 @@
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       }).catch(err => console.warn('[mult] reset failed:', err));
     });
+  }
+
+  /* ---------- Sea-creature confetti finale ---------- */
+
+  const CREATURES = ['🐳','🐋','🐬','🦭','🦦','🐟','🐠','🐡','🦈','🐙','🦑','🦀','🦞','🦐','🐢','🪼','🪸','🐚'];
+  let _celebrated = false;
+
+  function maybeCelebrate() {
+    if (tableState.filled.size === N * N && !_celebrated) {
+      _celebrated = true;
+      setPrompt(pick(LINES.done), 'celebrate');
+      seaCelebrate();
+    } else if (tableState.filled.size < N * N) {
+      _celebrated = false;
+    }
+  }
+
+  function seaCelebrate() {
+    const layer = document.createElement('div');
+    layer.className = 'confetti';
+    document.body.appendChild(layer);
+
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const vmin = Math.min(vw, vh);
+
+    const REF_VMIN = 768;
+    const scale = vmin / REF_VMIN;
+
+    const pieces     = Math.round(Math.max(30, Math.min(200, 70 * scale)));
+    const baseSize   = Math.max(26, Math.min(96, 46 * scale));
+    const sizeJitter = baseSize * 0.7;
+
+    const fallBase = 2.2 + (vh / 900) * 0.8;
+    const fallJitter = 1.6;
+
+    const currentDir = Math.random() < 0.5 ? -1 : 1;
+
+    for (let i = 0; i < pieces; i++) {
+      const piece = document.createElement('span');
+      piece.textContent = CREATURES[Math.floor(Math.random() * CREATURES.length)];
+      piece.style.left = `${Math.random() * 100}vw`;
+      piece.style.animationDuration = `${fallBase + Math.random() * fallJitter}s`;
+      piece.style.animationDelay = `${Math.random() * 0.6}s`;
+      piece.style.fontSize = `${baseSize + Math.random() * sizeJitter}px`;
+      const amp = (8 + Math.random() * 14) * currentDir;
+      piece.style.setProperty('--dx', `${amp}vw`);
+      layer.appendChild(piece);
+    }
+
+    setTimeout(() => layer.remove(), (fallBase + fallJitter + 0.6) * 1000 + 200);
   }
 })();

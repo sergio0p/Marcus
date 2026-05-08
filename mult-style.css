@@ -210,6 +210,30 @@ html, body {
 .btn-reset:active { transform: translateY(1px); }
 .btn-reset:focus { outline: 3px solid #ffd862; outline-offset: 2px; }
 
+/* ---------- Sea-creature confetti finale ---------- */
+
+.confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.confetti span {
+  position: absolute;
+  top: -60px;
+  line-height: 1;
+  animation: confetti-fall linear forwards;
+  will-change: transform;
+}
+
+@keyframes confetti-fall {
+  0%   { transform: translate(0,         0)     rotate(0);     opacity: 1; }
+  85%  {                                                       opacity: 1; }
+  100% { transform: translate(var(--dx), 110vh) rotate(720deg); opacity: 0.55; }
+}
+
 .table-wrap {
   display: flex;
   justify-content: center;
