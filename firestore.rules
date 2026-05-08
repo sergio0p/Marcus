@@ -1,0 +1,14 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Marcus's app state — anyone signed in (anonymous auth counts) can
+    // read/write a single shared doc per app. The site is unlisted; the
+    // anon-auth requirement keeps drive-by writes from anyone who hasn't
+    // loaded our SDK with our project config.
+    match /apps/{appId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

@@ -383,6 +383,7 @@
     }
 
     tableState.filled.set(key(r, c), v);
+    saveProgress();
     clearWaves();
     const cell = cellEl(r, c);
     cell.classList.add('filled');
@@ -422,5 +423,57 @@
   function initTable() {
     buildTable();
     document.getElementById('mult-table').addEventListener('click', onTableClick);
+    subscribeProgress();
+  }
+
+  /* ---------- Firestore sync (cross-device) ---------- */
+
+  let _subscribed = false;
+  const DOC_PATH = ['apps', 'marcus-mult'];
+
+  function progressDoc() {
+    return MarcusApps.db.collection(DOC_PATH[0]).doc(DOC_PATH[1]);
+  }
+
+  function applyRemoteFilled(filled) {
+    Object.keys(filled).forEach(k => {
+      const v = filled[k];
+      if (tableState.filled.get(k) === v) return;
+      tableState.filled.set(k, v);
+      const [r, c] = k.split(',').map(Number);
+      const cell = cellEl(r, c);
+      if (cell) {
+        cell.classList.add('filled');
+        cell.textContent = v;
+      }
+    });
+    if (tableState.filled.size === N * N) {
+      setPrompt(pick(LINES.done), 'celebrate');
+    }
+  }
+
+  function subscribeProgress() {
+    if (_subscribed) return;
+    if (!window.MarcusApps || !MarcusApps.ready || !MarcusApps.db) return;
+    _subscribed = true;
+    MarcusApps.ready.then(() => {
+      progressDoc().onSnapshot(snap => {
+        if (!snap.exists) return;
+        const data = snap.data() || {};
+        applyRemoteFilled(data.filled || {});
+      }, err => console.warn('[mult] subscribe failed:', err));
+    });
+  }
+
+  function saveProgress() {
+    if (!window.MarcusApps || !MarcusApps.ready || !MarcusApps.db) return;
+    MarcusApps.ready.then(() => {
+      const obj = {};
+      tableState.filled.forEach((v, k) => { obj[k] = v; });
+      progressDoc().set({
+        filled: obj,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true }).catch(err => console.warn('[mult] save failed:', err));
+    });
   }
 })();
