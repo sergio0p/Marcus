@@ -368,19 +368,21 @@
     }, inputDelay);
   }
 
-  function onSubmitProduct(e) {
-    if (e.key !== 'Enter' && e.key !== 'Tab') return;
-    e.preventDefault();
+  // Returns 'correct' | 'wrong' | 'empty' | 'none'.
+  function commitAttempt() {
+    const inp = document.getElementById('prod-input');
+    if (!inp) return 'none';
     const r = tableState.selectedRow;
     const c = tableState.selectedCol;
-    const inp = e.currentTarget;
-    const v = parseInt(inp.value, 10);
-    if (v !== r * c) {
+    const raw = inp.value.trim();
+    if (raw === '') return 'empty';
+    const v = parseInt(raw, 10);
+    if (Number.isNaN(v) || v !== r * c) {
       inp.classList.add('wrong');
       setTimeout(() => inp.classList.remove('wrong'), 460);
       inp.select();
       setPrompt(pick(LINES.wrong)(r, c), '');
-      return;
+      return 'wrong';
     }
 
     tableState.filled.set(key(r, c), v);
@@ -399,6 +401,28 @@
     } else {
       setPrompt(pick(LINES.correct)(r, c, v), 'celebrate');
     }
+    return 'correct';
+  }
+
+  function onSubmitProduct(e) {
+    if (e.key !== 'Enter' && e.key !== 'Tab') return;
+    e.preventDefault();
+    commitAttempt();
+  }
+
+  // Capture-phase listener: while an input is open, treat any click outside
+  // it as a submission. Correct → click continues (so a header click counts
+  // as the first selection of the next round). Wrong → swallow the click
+  // and refocus. Empty → ignore.
+  function onDocumentClickCapture(e) {
+    if (!isAwaitingAnswer()) return;
+    if (e.target.closest('#prod-input')) return;
+    const result = commitAttempt();
+    if (result !== 'correct') {
+      e.stopPropagation();
+      const inp = document.getElementById('prod-input');
+      if (inp) inp.focus();
+    }
   }
 
   function isAwaitingAnswer() {
@@ -406,11 +430,6 @@
   }
 
   function onTableClick(e) {
-    if (isAwaitingAnswer()) {
-      const inp = document.getElementById('prod-input');
-      if (inp) inp.focus();
-      return;
-    }
     const t = e.target.closest('th');
     if (!t) return;
     if (t.classList.contains('col-header')) {
@@ -434,6 +453,7 @@
     buildTable();
     document.getElementById('mult-table').addEventListener('click', onTableClick);
     document.getElementById('btn-reset').addEventListener('click', onResetClick);
+    document.addEventListener('click', onDocumentClickCapture, true);
     subscribeProgress();
   }
 
