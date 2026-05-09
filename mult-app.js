@@ -373,11 +373,12 @@
     e.preventDefault();
     const r = tableState.selectedRow;
     const c = tableState.selectedCol;
-    const v = parseInt(e.currentTarget.value, 10);
+    const inp = e.currentTarget;
+    const v = parseInt(inp.value, 10);
     if (v !== r * c) {
-      e.currentTarget.classList.add('wrong');
-      setTimeout(() => e.currentTarget.classList.remove('wrong'), 460);
-      e.currentTarget.select();
+      inp.classList.add('wrong');
+      setTimeout(() => inp.classList.remove('wrong'), 460);
+      inp.select();
       setPrompt(pick(LINES.wrong)(r, c), '');
       return;
     }
@@ -400,7 +401,16 @@
     }
   }
 
+  function isAwaitingAnswer() {
+    return !!document.querySelector('#mult-table td.cell.intersection .prod-input');
+  }
+
   function onTableClick(e) {
+    if (isAwaitingAnswer()) {
+      const inp = document.getElementById('prod-input');
+      if (inp) inp.focus();
+      return;
+    }
     const t = e.target.closest('th');
     if (!t) return;
     if (t.classList.contains('col-header')) {
