@@ -10,5 +10,19 @@ service cloud.firestore {
     match /apps/{appId} {
       allow read, write: if request.auth != null;
     }
+
+    // Practice attempt log — one row per answer submitted. The apps only
+    // ever append. Nothing client-side reads the log back or edits it, so
+    // a stray anonymous client can add noise but cannot mine or rewrite
+    // what's already there. Pull the log from the console or Admin SDK.
+    match /attempts/{attemptId} {
+      allow create: if request.auth != null
+                    && request.resource.data.keys().size() <= 30
+                    && request.resource.data.app is string
+                    && request.resource.data.step is string
+                    && request.resource.data.correct is bool
+                    && request.resource.data.sessionId is string;
+      allow read, update, delete: if false;
+    }
   }
 }

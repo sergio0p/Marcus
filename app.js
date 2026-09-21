@@ -50,6 +50,7 @@
     state.phase = 'pickS';
     state.s = null;
     state.sy = null;
+    logProblem();
     render();
   }
 
@@ -170,6 +171,7 @@
     const el = document.getElementById(id);
     if (!el) return;
     el.focus();
+    logOpen();
     el.addEventListener('keydown', handler);
     el.addEventListener('input', () => el.classList.remove('wrong'));
   }
@@ -217,6 +219,43 @@
     }
   }
 
+  /* ---------- attempt logging ---------- */
+
+  function logProblem() {
+    const log = window.MarcusApps && MarcusApps.log;
+    if (!log) return;
+    log.startProblem({
+      app: 'division',
+      x: state.x,
+      y: state.y,
+      level: els.diff.value,
+    });
+  }
+
+  function logOpen() {
+    const log = window.MarcusApps && MarcusApps.log;
+    if (log) log.open();
+  }
+
+  // One row per submission, right or wrong. `expected` is null for pickS,
+  // which has no single right answer — any chunk that fits is accepted.
+  function logAttempt(step, raw, given, expected, correct, reason) {
+    const log = window.MarcusApps && MarcusApps.log;
+    if (!log) return;
+    log.attempt({
+      step,
+      raw: String(raw == null ? '' : raw).slice(0, 12),
+      given: Number.isFinite(given) ? given : null,
+      expected: expected == null ? null : expected,
+      correct: !!correct,
+      reason: reason || null,
+      rowIndex: state.rows.length,
+      current: state.current,
+      s: state.s,
+      sy: state.sy,
+    });
+  }
+
   function shake(input) {
     input.classList.add('wrong');
     setTimeout(() => input.classList.remove('wrong'), 460);
@@ -237,8 +276,12 @@
     e.preventDefault();
     const input = e.currentTarget;
     const v = parseInt(input.value, 10);
-    if (!Number.isFinite(v) || v <= 0) return shake(input);
+    if (!Number.isFinite(v) || v <= 0) {
+      logAttempt('pickS', input.value, v, null, false, 'invalid');
+      return shake(input);
+    }
     if (v * state.y > state.current) {
+      logAttempt('pickS', input.value, v, null, false, 'tooBig');
       flashPrompt(
         `Hmm Marcus — <span class="hint">${v} × ${state.y} = ${v * state.y}</span>, that's bigger than ${state.current}. Try a smaller chunk.`,
         'warn'
@@ -246,6 +289,7 @@
       shake(input);
       return;
     }
+    logAttempt('pickS', input.value, v, null, true, null);
     state.s = v;
     state.phase = 'computeSY';
     renderActive();
@@ -257,7 +301,9 @@
     e.preventDefault();
     const input = e.currentTarget;
     const v = parseInt(input.value, 10);
-    if (v !== state.s * state.y) return shake(input);
+    const product = state.s * state.y;
+    logAttempt('computeSY', input.value, v, product, v === product, null);
+    if (v !== product) return shake(input);
     state.sy = v;
     state.phase = 'computeRem';
     renderActive();
@@ -269,6 +315,7 @@
     const input = e.currentTarget;
     const v = parseInt(input.value, 10);
     const expected = state.current - state.sy;
+    logAttempt('computeRem', input.value, v, expected, v === expected, null);
     if (v !== expected) return shake(input);
 
     state.rows.push({ s: state.s, sy: state.sy, remainder: expected });
@@ -285,6 +332,7 @@
     const input = e.currentTarget;
     const v = parseInt(input.value, 10);
     const total = state.rows.reduce((a, r) => a + r.s, 0);
+    logAttempt('sumQuotients', input.value, v, total, v === total, null);
     if (v !== total) return shake(input);
     state.phase = 'done';
     render();
@@ -326,6 +374,7 @@
     setTimeout(() => splash.remove(), 700);
     const liveInput = document.querySelector('input.box, .quotient-input');
     if (liveInput) liveInput.focus();
+    logOpen();
   }
 
   if (splash) {
