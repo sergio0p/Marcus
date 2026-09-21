@@ -32,6 +32,8 @@
     sy: null,
   };
 
+  let celebrated = false;
+
   function randInt(lo, hi) {
     return Math.floor(Math.random() * (hi - lo + 1)) + lo;
   }
@@ -50,6 +52,8 @@
     state.phase = 'pickS';
     state.s = null;
     state.sy = null;
+    celebrated = false;
+    if (window.StarShow) StarShow.reset();
     logProblem();
     render();
   }
@@ -110,7 +114,11 @@
       els.prompt.textContent = remainder
         ? `Yes, Marcus! ${state.x} ÷ ${state.y} = ${total}, with ${remainder} left over.`
         : `Perfect, Marcus! ${state.x} ÷ ${state.y} = ${total}.`;
-      celebrate();
+      if (!celebrated) {
+        celebrated = true;
+        if (minimalSteps() && window.StarShow) StarShow.play();
+        else celebrate();
+      }
       return;
     }
 
@@ -340,22 +348,18 @@
 
   /* ---------- celebration ---------- */
 
+  // Did he take the whole dividend in one chunk? One row is always the
+  // floor: picking s = floor(current / y) leaves a remainder below y
+  // straight away, so nothing can finish in fewer. Mistakes along the way
+  // don't disqualify — this is purely about the number of steps.
+  function minimalSteps() {
+    return state.rows.length === 1;
+  }
+
+  // Confetti and the perfect-run star both live in star-show.js, so the
+  // bench at star-demo.html exercises exactly what Marcus sees.
   function celebrate() {
-    const layer = document.createElement('div');
-    layer.className = 'confetti';
-    document.body.appendChild(layer);
-    const colors = ['#fff09e', '#ffc8a0', '#c5edcb', '#bedaf2', '#d9c8e8', '#d6453d', '#3aa847'];
-    for (let i = 0; i < 60; i++) {
-      const piece = document.createElement('span');
-      piece.style.left = `${Math.random() * 100}vw`;
-      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-      const dur = 1.6 + Math.random() * 1.6;
-      piece.style.animationDuration = `${dur}s`;
-      piece.style.animationDelay = `${Math.random() * 0.4}s`;
-      piece.style.transform = `rotate(${Math.random() * 360}deg)`;
-      layer.appendChild(piece);
-    }
-    setTimeout(() => layer.remove(), 3500);
+    if (window.StarShow) StarShow.confettiWaves();
   }
 
   /* ---------- listeners ---------- */

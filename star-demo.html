@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Star Show — debug bench</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@500;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="star-show.css" />
+  <style>
+    :root { --ink: #33404f; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Nunito', system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        repeating-linear-gradient(to bottom, transparent 0 31px, rgba(120,150,190,.22) 31px 32px),
+        #fdfbf4;
+    }
+    .bench { max-width: 760px; margin: 0 auto; padding: 28px 20px 80px; }
+    h1 { font-family: 'Caveat', cursive; font-size: 2.6rem; margin: 0 0 2px; }
+    .sub { margin: 0 0 22px; opacity: .72; font-size: .95rem; }
+    .panel {
+      background: #fff;
+      border: 1px solid rgba(80,110,150,.22);
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 10px rgba(40,70,110,.07);
+    }
+    .panel h2 {
+      font-size: .74rem; text-transform: uppercase; letter-spacing: .09em;
+      margin: 0 0 12px; opacity: .55; font-weight: 800;
+    }
+    .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+    button {
+      font: inherit; font-weight: 700; font-size: .9rem;
+      padding: 9px 15px; border-radius: 9px; cursor: pointer;
+      border: 1px solid rgba(80,110,150,.3); background: #f4f7fb; color: var(--ink);
+    }
+    button:hover { background: #e8eff8; }
+    button.primary { background: #d6453d; border-color: #b93a33; color: #fff; }
+    button.primary:hover { background: #c33d36; }
+    button.ghost { background: #fff; }
+    .row { display: grid; grid-template-columns: 92px 1fr 62px; gap: 12px; align-items: center; margin-bottom: 9px; }
+    .row label { font-size: .84rem; font-weight: 700; }
+    .row output { font-variant-numeric: tabular-nums; font-size: .82rem; opacity: .75; text-align: right; }
+    input[type=range] { width: 100%; }
+    .status {
+      display: flex; align-items: center; gap: 9px;
+      font-size: .9rem; font-weight: 700;
+    }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #c3ccd8; }
+    .dot.on { background: #3aa847; box-shadow: 0 0 0 4px rgba(58,168,71,.18); }
+    code { background: #f0f3f8; padding: 1px 6px; border-radius: 5px; font-size: .84em; }
+    .hint { font-size: .85rem; opacity: .7; line-height: 1.5; margin: 10px 0 0; }
+    .readout {
+      margin: 12px 0 0; padding: 10px 12px; border-radius: 8px;
+      background: #2c3440; color: #e7edf5; font-size: .8rem; overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .saved { color: #3aa847; font-weight: 700; font-size: .8rem; margin-left: 6px; }
+  </style>
+</head>
+<body>
+  <div class="bench">
+    <h1>Star Show</h1>
+    <p class="sub">The perfect-run celebration, on its own. Same <code>star-show.js</code> and <code>star-show.css</code> the division app loads — edit those and reload here.</p>
+
+    <div class="panel">
+      <h2>Run</h2>
+      <div class="btns">
+        <button class="primary" id="play">▶ Play full sequence</button>
+        <button class="ghost" id="reset">Reset</button>
+        <button class="ghost" id="confetti">Confetti only (3 waves)</button>
+      </div>
+      <p class="status" style="margin-top:14px;">
+        <span class="dot" id="dot"></span><span id="phase">idle</span>
+      </p>
+    </div>
+
+    <div class="panel">
+      <h2>Jump to a phase</h2>
+      <div class="btns" id="jumps"></div>
+      <p class="hint">Snaps to the opening pose of that phase with no run-up, so you can stare at one moment.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Timing (ms)</h2>
+      <div id="sliders"></div>
+      <div class="btns" style="margin-top:12px;">
+        <button class="primary" id="copy">⎘ Copy settings</button>
+        <button class="ghost" id="restore">Back to defaults</button>
+      </div>
+      <p class="hint">Your tweaks are saved in this browser, so they survive a reload. When you like it, hit <em>Copy settings</em> and paste the line into the chat — that's the only way the numbers reach me.</p>
+      <pre id="readout" class="readout"></pre>
+    </div>
+
+    <div class="panel">
+      <h2>Confetti waves</h2>
+      <div id="wavers"></div>
+      <p class="hint">The middle wave is the heaviest and the last the thinnest, so it swells and tails off rather than firing the same burst three times. <em>Gap</em> is the spacing between waves.</p>
+    </div>
+
+    <div class="panel">
+      <h2>What should happen</h2>
+      <p class="hint" style="margin-top:0;">
+        <strong>fly2d</strong> — big shiny star sweeps in, dead flat, spinning in 2-D only.<br>
+        <strong>tilt3d</strong> — it tips into perspective like the Star&nbsp;Wars crawl and rocks back and forth while it wanders.<br>
+        <strong>settle</strong> — levels out and glides to the top-right corner.<br>
+        <strong>stamp</strong> — slams down, silver/gold becomes red ink with a blotted rubber-stamp edge.<br>
+        <strong>finale</strong> — confetti, then “Congratulations Marcus !!! That was perfect !!!”
+      </p>
+    </div>
+  </div>
+
+  <script src="star-show.js"></script>
+  <script>
+    (function () {
+      var phaseEl = document.getElementById('phase');
+      var dotEl = document.getElementById('dot');
+
+      StarShow.onPhase(function (name) {
+        phaseEl.textContent = name || 'idle';
+        dotEl.classList.toggle('on', !!name);
+      });
+
+      document.getElementById('play').addEventListener('click', function () { StarShow.play(); });
+      document.getElementById('reset').addEventListener('click', function () { StarShow.reset(); });
+      document.getElementById('confetti').addEventListener('click', function () { StarShow.confettiWaves(); });
+
+      var jumps = document.getElementById('jumps');
+      StarShow.PHASES.forEach(function (p) {
+        var b = document.createElement('button');
+        b.textContent = p;
+        b.addEventListener('click', function () { StarShow.jump(p); });
+        jumps.appendChild(b);
+      });
+
+      // deep link: star-demo.html#stamp opens straight on that phase
+      function fromHash() {
+        var h = (location.hash || '').replace('#', '');
+        if (h === 'play') StarShow.play();
+        else if (StarShow.PHASES.indexOf(h) !== -1) StarShow.jump(h);
+      }
+      window.addEventListener('hashchange', fromHash);
+      fromHash();
+
+      var KEY = 'starshow.timing';
+      var DEFAULTS = {};
+      StarShow.PHASES.forEach(function (p) { DEFAULTS[p] = StarShow.timing[p]; });
+
+      // bring back whatever was set last time in this browser
+      try {
+        var saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+        StarShow.PHASES.forEach(function (p) {
+          if (typeof saved[p] === 'number') StarShow.timing[p] = saved[p];
+        });
+      } catch (e) { /* private mode - just use defaults */ }
+
+      var readout = document.getElementById('readout');
+      var inputs = {};
+
+      function persist() {
+        try { localStorage.setItem(KEY, JSON.stringify(StarShow.timing)); } catch (e) {}
+      }
+
+      var WAVE_KEY = 'starshow.confetti';
+      var WAVE_DEFAULTS = {};
+      var WAVE_RANGE = { waves: [1, 6, 1], gap: [100, 1500, 20], pieces: [10, 160, 5] };
+      Object.keys(WAVE_RANGE).forEach(function (k) { WAVE_DEFAULTS[k] = StarShow.confettiConfig[k]; });
+
+      try {
+        var savedW = JSON.parse(localStorage.getItem(WAVE_KEY) || '{}');
+        Object.keys(WAVE_RANGE).forEach(function (k) {
+          if (typeof savedW[k] === 'number') StarShow.confettiConfig[k] = savedW[k];
+        });
+      } catch (e) {}
+
+      function draw() {
+        var parts = StarShow.PHASES.map(function (p) { return p + ': ' + StarShow.timing[p]; });
+        var total = StarShow.PHASES.reduce(function (a, p) { return a + StarShow.timing[p]; }, 0);
+        var c = StarShow.confettiConfig;
+        readout.textContent =
+          'StarShow.timing = { ' + parts.join(', ') + ' }   // total ' + (total / 1000).toFixed(1) + 's\n' +
+          'StarShow.confettiConfig = { waves: ' + c.waves + ', gap: ' + c.gap + ', pieces: ' + c.pieces + ' }';
+      }
+
+      var sliders = document.getElementById('sliders');
+      StarShow.PHASES.forEach(function (p) {
+        var row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML =
+          '<label for="t-' + p + '">' + p + '</label>' +
+          '<input type="range" id="t-' + p + '" min="150" max="8000" step="50" value="' + StarShow.timing[p] + '">' +
+          '<output id="o-' + p + '">' + StarShow.timing[p] + '</output>';
+        sliders.appendChild(row);
+        var input = row.querySelector('input'), out = row.querySelector('output');
+        inputs[p] = { input: input, out: out };
+        input.addEventListener('input', function () {
+          StarShow.timing[p] = +input.value;
+          out.textContent = input.value;
+          persist();
+          draw();
+        });
+      });
+
+      function sync() {
+        StarShow.PHASES.forEach(function (p) {
+          inputs[p].input.value = StarShow.timing[p];
+          inputs[p].out.textContent = StarShow.timing[p];
+        });
+        Object.keys(waveInputs).forEach(function (k) {
+          waveInputs[k].input.value = StarShow.confettiConfig[k];
+          waveInputs[k].out.textContent = StarShow.confettiConfig[k];
+        });
+        draw();
+      }
+
+      var wavers = document.getElementById('wavers');
+      var waveInputs = {};
+      Object.keys(WAVE_RANGE).forEach(function (k) {
+        var r = WAVE_RANGE[k];
+        var row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML =
+          '<label for="w-' + k + '">' + k + '</label>' +
+          '<input type="range" id="w-' + k + '" min="' + r[0] + '" max="' + r[1] + '" step="' + r[2] + '" value="' + StarShow.confettiConfig[k] + '">' +
+          '<output>' + StarShow.confettiConfig[k] + '</output>';
+        wavers.appendChild(row);
+        var input = row.querySelector('input'), out = row.querySelector('output');
+        waveInputs[k] = { input: input, out: out };
+        input.addEventListener('input', function () {
+          StarShow.confettiConfig[k] = +input.value;
+          out.textContent = input.value;
+          try { localStorage.setItem(WAVE_KEY, JSON.stringify(StarShow.confettiConfig)); } catch (e) {}
+          draw();
+        });
+      });
+
+      document.getElementById('copy').addEventListener('click', function () {
+        var btn = this;
+        var text = readout.textContent;
+        var done = function () {
+          var tag = document.createElement('span');
+          tag.className = 'saved';
+          tag.textContent = 'copied \u2014 paste it to Claude';
+          btn.after(tag);
+          setTimeout(function () { tag.remove(); }, 2600);
+        };
+        if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, done);
+        else done();
+      });
+
+      document.getElementById('restore').addEventListener('click', function () {
+        StarShow.PHASES.forEach(function (p) { StarShow.timing[p] = DEFAULTS[p]; });
+        Object.keys(WAVE_RANGE).forEach(function (k) { StarShow.confettiConfig[k] = WAVE_DEFAULTS[k]; });
+        persist();
+        try { localStorage.setItem(WAVE_KEY, JSON.stringify(StarShow.confettiConfig)); } catch (e) {}
+        sync();
+      });
+
+      sync();
+    })();
+  </script>
+</body>
+</html>

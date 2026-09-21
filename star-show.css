@@ -1,0 +1,128 @@
+/* ---------- Perfect-run star show ----------
+   Used by division.html and by star-demo.html, which drives the same
+   sequence with no arithmetic in the way. Edit here, both pick it up. */
+
+.star-show {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  pointer-events: none;
+  perspective: 900px;
+  perspective-origin: 50% 50%;
+}
+
+.star-show[hidden] { display: none; }
+
+/* translation + scale live here; rotation lives on .star-tilt, so the
+   flight path and the tilt can be animated independently */
+.star-fly {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.star-tilt {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.star-svg {
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 0 22px rgba(255, 206, 92, 0.85))
+          drop-shadow(0 6px 18px rgba(120, 80, 0, 0.35));
+  transition: filter 160ms ease-out;
+}
+
+/* the moving highlight that makes the metal read as polished */
+.sheen-wrap {
+  animation: star-sheen 1.5s linear infinite;
+}
+
+@keyframes star-sheen {
+  from { transform: translateX(0); }
+  to   { transform: translateX(210px); }
+}
+
+.star-shiny,
+.star-ink {
+  transition: opacity 130ms ease-out;
+}
+
+.star-ink { opacity: 0; }
+
+/* the moment it lands: metal off, ink on, glow gone */
+.star-show.is-inked .star-shiny { opacity: 0; }
+.star-show.is-inked .star-ink   { opacity: 1; }
+.star-show.is-inked .star-svg   { filter: none; }
+.star-show.is-inked .sheen-wrap { animation: none; }
+
+/* ---------- congratulations ---------- */
+
+.congrats {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  transform: translate(-50%, -50%) scale(0.6) rotate(-3deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1em;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 260ms ease-out, transform 420ms cubic-bezier(.2, 1.5, .4, 1);
+}
+
+.star-show.is-done .congrats {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1) rotate(-3deg);
+}
+
+.congrats-l1 {
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  font-size: clamp(2.2rem, 7.5vw, 4.6rem);
+  line-height: 1.05;
+  color: #d6453d;
+  text-shadow: 2px 3px 0 rgba(255, 255, 255, 0.9), 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.congrats-l2 {
+  font-family: 'Patrick Hand', cursive;
+  font-size: clamp(1.3rem, 4vw, 2.4rem);
+  color: #3a7d44;
+  text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* ---------- Confetti ---------- */
+
+.confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.confetti span {
+  position: absolute;
+  top: -10px;
+  width: 10px;
+  height: 14px;
+  opacity: 0.9;
+  animation: confetti-fall linear forwards;
+  border-radius: 1px;
+}
+
+@keyframes confetti-fall {
+  0%   { transform: translateY(0) rotate(0); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheen-wrap { animation: none; }
+}
