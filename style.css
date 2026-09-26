@@ -540,9 +540,14 @@ input.box.wrong { animation: shake 0.45s ease-in-out; }
   width: min(96vw, 1400px);
   aspect-ratio: 1824 / 1439;
   max-height: 96vh;
-  background: url('clay.png') center / contain no-repeat;
   border-radius: 6px;
   overflow: hidden;
+}
+
+.splash-art {
+  position: absolute;
+  inset: 0;
+  background: url('clay.png') center / contain no-repeat;
 }
 
 .splash-text {
@@ -594,12 +599,107 @@ input.box.wrong { animation: shake 0.45s ease-in-out; }
   outline-offset: 3px;
 }
 
-@media (max-width: 600px) {
+/* Phones: the sky beside Clay is too small for his words at a readable
+   size, so they move into a speech bubble below him (upright) or beside
+   him (sideways). The frame's width is min(96vw, 121.7vh), so these
+   bounds catch every frame narrower than about 700px. */
+@media (max-width: 728px), (max-height: 575px) {
+  .splash {
+    align-items: safe center;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .splash-frame {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 22px;
+    width: min(100%, 520px);
+    aspect-ratio: auto;
+    max-height: none;
+    overflow: visible;
+    border-radius: 0;
+  }
+
+  .splash-art {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    aspect-ratio: 1824 / 1439;
+    background-size: cover;
+    border-radius: 6px;
+  }
+
   .splash-text {
-    top: 5%;
-    right: calc(7% + 4em);
-    width: 22%;
+    position: relative;
+    top: auto;
+    right: auto;
+    width: auto;
+    max-width: 30ch;
+    padding: 16px 20px 10px;
+    background: linear-gradient(180deg, #9fd3f2, #c6e6f8);
+    border-radius: 16px;
+    color: #173a63;
+    text-shadow: none;
+    font-size: 19px;
     line-height: 1.45;
+  }
+
+  /* Speech-bubble tail pointing up at Clay. */
+  .splash-text::before {
+    content: '';
+    position: absolute;
+    top: -14px;
+    left: 26%;
+    border: 14px solid transparent;
+    border-top: 0;
+    border-bottom-color: #9fd3f2;
+  }
+
+  .splash-dismiss {
+    position: static;
+    font-size: 20px;
+    padding: 10px 22px 8px;
+  }
+}
+
+@media (max-height: 575px) and (orientation: landscape) {
+  .splash-frame {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: 1fr auto;
+    align-items: center;
+    column-gap: 26px;
+    row-gap: 14px;
+    width: 100%;
+    max-width: 980px;
+  }
+
+  .splash-art {
+    grid-row: 1 / 3;
+    width: auto;
+    height: calc(100vh - 32px);
+    height: calc(100dvh - 32px);
+  }
+
+  .splash-text {
+    align-self: end;
+    justify-self: start;
+    font-size: 17px;
+  }
+
+  /* Tail on the left, pointing back at Clay. */
+  .splash-text::before {
+    top: 32%;
+    left: -14px;
+    border: 14px solid transparent;
+    border-left: 0;
+    border-right-color: #aad8f3;
+  }
+
+  .splash-dismiss {
+    align-self: start;
+    justify-self: start;
   }
 }
 
