@@ -155,6 +155,7 @@
           <span class="muted">${state.y}</span>
           <span class="muted">≤</span>
           <span class="muted">${state.working}</span>
+          ${CHECK_BUTTON}
         </div>
       `;
       els.activeRow.appendChild(wrap);
@@ -175,6 +176,7 @@
           <span class="muted">${state.y}</span>
           <span class="muted">=</span>
           <input class="box wide" id="input-p" inputmode="numeric" autocomplete="off" maxlength="4" aria-label="${state.d} times ${state.y}"/>
+          ${CHECK_BUTTON}
         </div>
       `;
       els.activeRow.appendChild(wrap);
@@ -202,6 +204,7 @@
           <span class="muted">${state.product}</span>
           <span class="muted">=</span>
           <input class="box wide" id="input-r" inputmode="numeric" autocomplete="off" maxlength="4" aria-label="${state.working} minus ${state.product}"/>
+          ${CHECK_BUTTON}
         </div>
       `;
       els.activeRow.appendChild(wrap);
@@ -255,17 +258,34 @@
 
   /* ---------- input handlers ---------- */
 
-  function attachInput(id, handler) {
+  // iPhone's number pad has no Return key, so every answer box gets a
+  // check button at the end of its line. Enter and Tab still submit.
+  const CHECK_BUTTON =
+    `<button class="btn-check" type="button" aria-label="Check answer">` +
+    `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>` +
+    `</button>`;
+
+  function attachInput(id, submit) {
     const el = document.getElementById(id);
     if (!el) return;
     el.focus();
-    el.addEventListener('keydown', handler);
+    el.addEventListener('keydown', (e) => {
+      if (!isSubmitKey(e)) return;
+      e.preventDefault();
+      submit(el);
+    });
     el.addEventListener('input', () => el.classList.remove('wrong'));
+
+    const btn = el.closest('.active-line').querySelector('.btn-check');
+    // Keep focus in the box so the keyboard doesn't drop between tries.
+    btn.addEventListener('mousedown', (e) => e.preventDefault());
+    btn.addEventListener('click', () => submit(el));
   }
 
   function shake(input) {
     input.classList.add('wrong');
     setTimeout(() => input.classList.remove('wrong'), 460);
+    input.focus();
     input.select();
   }
 
@@ -278,10 +298,7 @@
     return e.key === 'Enter' || e.key === 'Tab';
   }
 
-  function onSubmitDigit(e) {
-    if (!isSubmitKey(e)) return;
-    e.preventDefault();
-    const input = e.currentTarget;
+  function onSubmitDigit(input) {
     const v = parseInt(input.value, 10);
     if (!Number.isFinite(v) || v < 0 || v > 9) return shake(input);
     if (v * state.y > state.working) {
@@ -306,10 +323,7 @@
     renderQuotient();
   }
 
-  function onSubmitProduct(e) {
-    if (!isSubmitKey(e)) return;
-    e.preventDefault();
-    const input = e.currentTarget;
+  function onSubmitProduct(input) {
     const v = parseInt(input.value, 10);
     if (v !== state.d * state.y) return shake(input);
     state.product = v;
@@ -317,10 +331,7 @@
     renderActive();
   }
 
-  function onSubmitDiff(e) {
-    if (!isSubmitKey(e)) return;
-    e.preventDefault();
-    const input = e.currentTarget;
+  function onSubmitDiff(input) {
     const v = parseInt(input.value, 10);
     const expected = state.working - state.product;
     if (v !== expected) return shake(input);
