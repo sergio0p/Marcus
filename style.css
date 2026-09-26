@@ -217,7 +217,7 @@ body {
 .row {
   position: relative;
   display: grid;
-  grid-template-columns: 36px 1fr;
+  grid-template-columns: 36px 1fr var(--check-gutter, 0px);
   align-items: baseline;
   padding: 2px 8px 2px 4px;
 }
@@ -245,7 +245,7 @@ body {
 .row.completed::before {
   content: '';
   position: absolute;
-  inset: 0px -10px 0px -6px;
+  inset: 0px calc(var(--check-gutter, 0px) - 10px) 0px -6px;
   background: var(--hl-1);
   z-index: -1;
   border-radius: 4px;
@@ -315,6 +315,51 @@ input.box.xwide { width: 6ch; }
 
 input.box.wrong { animation: shake 0.45s ease-in-out; }
 
+/* Check button: every row keeps an empty gutter on the right so the
+   active row's button doesn't shift its digits out of column. */
+.stack-column,
+.quotient-column { --check-gutter: 54px; }
+
+.btn-check {
+  grid-column: 3;
+  justify-self: end;
+  align-self: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: 12px;
+  box-shadow: 3px 3px 0 var(--accent);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.btn-check svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.btn-check:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--accent); }
+.btn-check:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--accent); }
+.btn-check:focus-visible { outline: 3px solid var(--hl-4); outline-offset: 3px; }
+
+.quotient-total .btn-check {
+  position: absolute;
+  right: 0;
+  top: calc(50% - 22px);
+}
+
 .row .paren { color: var(--ink-soft); margin: 0 1px; }
 
 /* ---------- Quotient column ---------- */
@@ -338,7 +383,7 @@ input.box.wrong { animation: shake 0.45s ease-in-out; }
   align-items: flex-end;
   min-height: 180px;
   gap: 2px;
-  padding-right: 6px;
+  padding-right: calc(6px + var(--check-gutter, 0px));
 }
 
 .quotient-list .q {
@@ -365,7 +410,7 @@ input.box.wrong { animation: shake 0.45s ease-in-out; }
 }
 
 .quotient-bar {
-  margin: 8px 6px 6px auto;
+  margin: 8px calc(6px + var(--check-gutter, 0px)) 6px auto;
   border-top: 3px solid var(--ink);
   width: 60%;
 }
@@ -399,13 +444,14 @@ input.box.wrong { animation: shake 0.45s ease-in-out; }
 }
 
 .quotient-total {
+  position: relative;
   font-family: 'Caveat', cursive;
   font-weight: 700;
   font-size: clamp(40px, 5.6vw, 64px);
   text-align: right;
   color: var(--success);
   letter-spacing: 1px;
-  padding-right: 6px;
+  padding-right: calc(6px + var(--check-gutter, 0px));
   animation: total-pop 0.7s cubic-bezier(.25,.9,.3,1.6);
   line-height: 1;
 }

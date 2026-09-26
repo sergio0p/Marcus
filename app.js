@@ -134,7 +134,7 @@
         <span class="op">−</span>
         <span class="val">
           <span class="paren">(</span><input class="box" id="input-s" inputmode="numeric" autocomplete="off" maxlength="5" aria-label="how many ${state.y}s"/> <span class="paren">×</span> ${state.y}<span class="paren">)</span>
-        </span>`;
+        </span>${CHECK_BUTTON}`;
       els.activeRow.appendChild(wrap);
       attachInput('input-s', onSubmitS);
       return;
@@ -148,7 +148,7 @@
       wrap.className = 'row has-bar';
       wrap.innerHTML = `
         <span class="op">−</span>
-        <span class="val"><input class="box wide" id="input-sy" inputmode="numeric" autocomplete="off" maxlength="6" aria-label="${state.s} times ${state.y}"/></span>`;
+        <span class="val"><input class="box wide" id="input-sy" inputmode="numeric" autocomplete="off" maxlength="6" aria-label="${state.s} times ${state.y}"/></span>${CHECK_BUTTON}`;
       els.activeRow.appendChild(wrap);
       attachInput('input-sy', onSubmitSY);
       return;
@@ -167,7 +167,7 @@
       remRow.className = 'row';
       remRow.innerHTML = `
         <span class="op"></span>
-        <span class="val"><input class="box wide" id="input-rem" inputmode="numeric" autocomplete="off" maxlength="6" aria-label="${state.current} minus ${state.sy}"/></span>`;
+        <span class="val"><input class="box wide" id="input-rem" inputmode="numeric" autocomplete="off" maxlength="6" aria-label="${state.current} minus ${state.sy}"/></span>${CHECK_BUTTON}`;
       els.activeRow.appendChild(sub);
       els.activeRow.appendChild(remRow);
       attachInput('input-rem', onSubmitRem);
@@ -175,13 +175,29 @@
     }
   }
 
-  function attachInput(id, handler) {
+  // iPhone's number pad has no Return key, so every answer box gets a
+  // check button beside it. Enter and Tab still submit on a keyboard.
+  const CHECK_BUTTON =
+    `<button class="btn-check" type="button" aria-label="Check answer">` +
+    `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>` +
+    `</button>`;
+
+  function attachInput(id, submit) {
     const el = document.getElementById(id);
     if (!el) return;
     el.focus();
     logOpen();
-    el.addEventListener('keydown', handler);
+    el.addEventListener('keydown', (e) => {
+      if (!isSubmitKey(e)) return;
+      e.preventDefault();
+      submit(el);
+    });
     el.addEventListener('input', () => el.classList.remove('wrong'));
+
+    const btn = el.closest('.row, .quotient-total').querySelector('.btn-check');
+    // Keep focus in the box so the keyboard doesn't drop between tries.
+    btn.addEventListener('mousedown', (e) => e.preventDefault());
+    btn.addEventListener('click', () => submit(el));
   }
 
   function renderQuotient() {
@@ -209,7 +225,8 @@
       els.quotientTotal.classList.add('input-mode');
       els.quotientTotal.innerHTML =
         `<input class="quotient-input" id="input-sum" inputmode="numeric" autocomplete="off" maxlength="6" aria-label="total quotient" />` +
-        (remainder ? ` <span class="rem">r ${remainder}</span>` : '');
+        (remainder ? ` <span class="rem">r ${remainder}</span>` : '') +
+        CHECK_BUTTON;
       attachInput('input-sum', onSubmitSum);
     } else if (state.phase === 'done') {
       const total = state.rows.reduce((a, r) => a + r.s, 0);
@@ -267,6 +284,7 @@
   function shake(input) {
     input.classList.add('wrong');
     setTimeout(() => input.classList.remove('wrong'), 460);
+    input.focus();
     input.select();
   }
 
@@ -279,10 +297,7 @@
     return e.key === 'Enter' || e.key === 'Tab';
   }
 
-  function onSubmitS(e) {
-    if (!isSubmitKey(e)) return;
-    e.preventDefault();
-    const input = e.currentTarget;
+  function onSubmitS(input) {
     const v = parseInt(input.value, 10);
     if (!Number.isFinite(v) || v <= 0) {
       logAttempt('pickS', input.value, v, null, false, 'invalid');
@@ -304,10 +319,7 @@
     renderQuotient();
   }
 
-  function onSubmitSY(e) {
-    if (!isSubmitKey(e)) return;
-    e.preventDefault();
-    const input = e.currentTarget;
+  function onSubmitSY(input) {
     const v = parseInt(input.value, 10);
     const product = state.s * state.y;
     logAttempt('computeSY', input.value, v, product, v === product, null);
@@ -317,10 +329,7 @@
     renderActive();
   }
 
-  function onSubmitRem(e) {
-    if (!isSubmitKey(e)) return;
-    e.preventDefault();
-    const input = e.currentTarget;
+  function onSubmitRem(input) {
     const v = parseInt(input.value, 10);
     const expected = state.current - state.sy;
     logAttempt('computeRem', input.value, v, expected, v === expected, null);
@@ -334,10 +343,7 @@
     render();
   }
 
-  function onSubmitSum(e) {
-    if (!isSubmitKey(e)) return;
-    e.preventDefault();
-    const input = e.currentTarget;
+  function onSubmitSum(input) {
     const v = parseInt(input.value, 10);
     const total = state.rows.reduce((a, r) => a + r.s, 0);
     logAttempt('sumQuotients', input.value, v, total, v === total, null);
