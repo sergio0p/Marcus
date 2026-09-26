@@ -604,8 +604,11 @@ input.box.wrong { animation: shake 0.45s ease-in-out; }
    him (sideways). The frame's width is min(96vw, 121.7vh), so these
    bounds catch every frame narrower than about 700px. */
 @media (max-width: 728px), (max-height: 575px) {
+  /* Auto margins centre the frame when it fits and, unlike
+     align-items: center, never push its top out of reach when it
+     doesn't (older iOS Safari lacks align-items: safe center). */
   .splash {
-    align-items: safe center;
+    align-items: flex-start;
     overflow-y: auto;
     padding: 16px;
   }
@@ -614,7 +617,8 @@ input.box.wrong { animation: shake 0.45s ease-in-out; }
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     justify-items: center;
-    gap: 22px;
+    gap: 16px;
+    margin: auto;
     width: min(100%, 520px);
     aspect-ratio: auto;
     max-height: none;
@@ -622,10 +626,13 @@ input.box.wrong { animation: shake 0.45s ease-in-out; }
     border-radius: 0;
   }
 
+  /* On short screens the picture gives up height first, keeping its
+     proportions, so the bubble and button still fit (~330px of them). */
   .splash-art {
     position: relative;
     inset: auto;
-    width: 100%;
+    width: min(100%, max(180px, calc((100vh - 330px) * 1.2676)));
+    width: min(100%, max(180px, calc((100dvh - 330px) * 1.2676)));
     aspect-ratio: 1824 / 1439;
     background-size: cover;
     border-radius: 6px;
@@ -637,14 +644,18 @@ input.box.wrong { animation: shake 0.45s ease-in-out; }
     right: auto;
     width: auto;
     max-width: 30ch;
-    padding: 16px 20px 10px;
+    padding: 12px 18px 6px;
     background: linear-gradient(180deg, #9fd3f2, #c6e6f8);
     border-radius: 16px;
     color: #173a63;
     text-shadow: none;
     font-size: 19px;
-    line-height: 1.45;
+    line-height: 1.25;
   }
+
+  .splash-text p { margin-bottom: 0.4em; }
+  .splash-text .splash-name { margin-bottom: 0.2em; }
+  .splash-text .splash-cta { margin-top: 0.5em; }
 
   /* Speech-bubble tail pointing up at Clay. */
   .splash-text::before {
@@ -670,7 +681,7 @@ input.box.wrong { animation: shake 0.45s ease-in-out; }
     grid-template-rows: 1fr auto;
     align-items: center;
     column-gap: 26px;
-    row-gap: 14px;
+    row-gap: 12px;
     width: 100%;
     max-width: 980px;
   }
