@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Marcus's Math Apps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@700&family=Nunito:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper:      #faf3e6;
+      --paper-soft: rgba(255, 255, 255, 0.55);
+      --ink:        #1c2a3a;
+      --ink-soft:   #5a6878;
+      --rule:       rgba(110, 142, 178, 0.22);
+      --accent:     #d6453d;
+      --shadow-soft: 0 1px 2px rgba(0,0,0,0.04), 0 6px 18px rgba(28,42,58,0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+      font-size: 18px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      min-height: 100vh;
+      background-image:
+        linear-gradient(to right, var(--rule) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
+      background-size: 28px 28px;
+      background-position: -1px -1px;
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: clamp(28px, 5vh, 56px) clamp(16px, 4vw, 44px) 48px;
+    }
+
+    .title {
+      font-family: 'Caveat', cursive;
+      font-weight: 700;
+      font-size: clamp(40px, 6vw, 64px);
+      margin: 0 0 clamp(28px, 5vh, 48px);
+      text-align: center;
+      transform: rotate(-1.5deg);
+      text-shadow: 1px 1px 0 rgba(214, 69, 61, 0.12);
+    }
+
+    .apps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: clamp(24px, 3vw, 36px);
+    }
+
+    .app {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 36px 24px 28px;
+      background: var(--paper-soft);
+      border: 2px solid var(--ink);
+      border-radius: 14px;
+      box-shadow: var(--shadow-soft), 4px 4px 0 var(--accent);
+      color: inherit;
+      text-decoration: none;
+      transition: transform 0.08s ease, box-shadow 0.08s ease;
+    }
+
+    .app:hover  { transform: translate(-2px, -2px); box-shadow: var(--shadow-soft), 6px 6px 0 var(--accent); }
+    .app:active { transform: translate(2px, 2px);   box-shadow: var(--shadow-soft), 2px 2px 0 var(--accent); }
+    .app:focus-visible { outline: 3px solid #bedaf2; outline-offset: 4px; }
+
+    .tape {
+      position: absolute;
+      top: -14px;
+      width: 78px;
+      height: 24px;
+      background: var(--tape-color);
+      border: 1px dashed rgba(0,0,0,0.18);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .glyph {
+      font-family: 'Patrick Hand', cursive;
+      font-size: 88px;
+      line-height: 1;
+      margin-bottom: 14px;
+    }
+
+    .glyph .ld {
+      display: inline-block;
+      border-left: 4px solid var(--ink);
+      border-top: 4px solid var(--ink);
+      border-top-left-radius: 22px 60px;
+      padding: 4px 6px 0 14px;
+      font-size: 64px;
+    }
+
+    .name {
+      font-family: 'Patrick Hand', cursive;
+      font-size: 32px;
+      margin: 0 0 6px;
+    }
+
+    .blurb {
+      color: var(--ink-soft);
+      margin: 0;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1 class="title">Marcus's Math Apps</h1>
+
+    <nav class="apps">
+      <a class="app" href="division.html">
+        <span class="tape" style="--tape-color: rgba(255, 220, 130, 0.7); right: 28px; transform: rotate(-3deg);"></span>
+        <span class="glyph" aria-hidden="true">÷</span>
+        <h2 class="name">Division</h2>
+        <p class="blurb">Help Clay with partial quotients.</p>
+      </a>
+
+      <a class="app" href="longdivision.html">
+        <span class="tape" style="--tape-color: rgba(190, 218, 242, 0.75); left: 28px; transform: rotate(2.5deg);"></span>
+        <span class="glyph" aria-hidden="true"><span class="ld">12</span></span>
+        <h2 class="name">Long Division</h2>
+        <p class="blurb">Divide step by step.</p>
+      </a>
+
+      <a class="app" href="multiplication.html">
+        <span class="tape" style="--tape-color: rgba(197, 237, 203, 0.8); right: 28px; transform: rotate(-2deg);"></span>
+        <span class="glyph" aria-hidden="true">×</span>
+        <h2 class="name">Multiplication Table</h2>
+        <p class="blurb">Help Tsunami fill in the table.</p>
+      </a>
+    </nav>
+  </div>
+</body>
+</html>
