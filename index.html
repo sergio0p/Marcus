@@ -3,149 +3,382 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Marcus's Math Apps</title>
+  <title>Marcus’s Arithmancy</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@700&family=Nunito:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
   <style>
     :root {
-      --paper:      #faf3e6;
-      --paper-soft: rgba(255, 255, 255, 0.55);
-      --ink:        #1c2a3a;
-      --ink-soft:   #5a6878;
-      --rule:       rgba(110, 142, 178, 0.22);
-      --accent:     #d6453d;
-      --shadow-soft: 0 1px 2px rgba(0,0,0,0.04), 0 6px 18px rgba(28,42,58,0.08);
+      --night:      #121826;
+      --stone:      #232c3d;
+      --gilt:       #c8a04e;
+      --gilt-light: #f3dc97;
+      --gilt-dark:  #6e5220;
+      --parchment:  #eadfc4;
+      --revelio:    #8fe3ef;
+
+      --gilt-metal: linear-gradient(155deg,
+        #6e5220 0%, #f3dc97 16%, #a9843a 30%, #ecd28a 46%,
+        #8a6726 62%, #e0c070 80%, #5c4418 100%);
     }
 
     * { box-sizing: border-box; }
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: var(--paper);
-      color: var(--ink);
-      font-family: 'Nunito', system-ui, -apple-system, sans-serif;
-      font-size: 18px;
-      -webkit-font-smoothing: antialiased;
-    }
+    html, body { margin: 0; padding: 0; }
 
     body {
       min-height: 100vh;
+      background-color: var(--night);
       background-image:
-        linear-gradient(to right, var(--rule) 1px, transparent 1px),
-        linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
-      background-size: 28px 28px;
-      background-position: -1px -1px;
+        radial-gradient(ellipse 70% 45% at 50% -8%, rgba(255, 186, 104, 0.20), transparent 70%),
+        radial-gradient(ellipse 120% 90% at 50% 40%, var(--stone), var(--night) 75%);
+      color: var(--parchment);
+      font-family: 'IM Fell English', Georgia, serif;
+      font-size: 20px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
-    .page {
-      max-width: 1100px;
+    /* Grain and mottling of the castle stone. */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.55;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.008' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .6 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    }
+
+    .hall {
+      position: relative;
+      max-width: 1120px;
       margin: 0 auto;
-      padding: clamp(28px, 5vh, 56px) clamp(16px, 4vw, 44px) 48px;
+      padding: clamp(36px, 7vh, 72px) 16px 64px;
+      text-align: center;
     }
 
     .title {
-      font-family: 'Caveat', cursive;
-      font-weight: 700;
-      font-size: clamp(40px, 6vw, 64px);
-      margin: 0 0 clamp(28px, 5vh, 48px);
-      text-align: center;
-      transform: rotate(-1.5deg);
-      text-shadow: 1px 1px 0 rgba(214, 69, 61, 0.12);
+      margin: 0;
+      font-family: 'IM Fell English SC', 'IM Fell English', Georgia, serif;
+      font-weight: 400;
+      font-size: clamp(46px, 7.4vw, 90px);
+      line-height: 1;
+      letter-spacing: 0.01em;
+      background: linear-gradient(180deg, #f7e6ae 0%, #e2c276 42%, #a9843a 64%, #f0d890 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 2px 0 rgba(28, 18, 4, 0.9)) drop-shadow(0 0 22px rgba(255, 190, 110, 0.22));
     }
 
-    .apps {
+    .invite {
+      margin: 0.6em 0 0;
+      font-style: italic;
+      font-size: clamp(19px, 2.2vw, 23px);
+      color: rgba(234, 223, 196, 0.82);
+    }
+
+    /* ---------- The gallery wall ---------- */
+
+    .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: clamp(24px, 3vw, 36px);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(28px, 4vw, 56px);
+      margin-top: clamp(44px, 8vh, 80px);
     }
 
-    .app {
+    .portrait {
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      text-align: center;
-      padding: 36px 24px 28px;
-      background: var(--paper-soft);
-      border: 2px solid var(--ink);
-      border-radius: 14px;
-      box-shadow: var(--shadow-soft), 4px 4px 0 var(--accent);
       color: inherit;
       text-decoration: none;
-      transition: transform 0.08s ease, box-shadow 0.08s ease;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .app:hover  { transform: translate(-2px, -2px); box-shadow: var(--shadow-soft), 6px 6px 0 var(--accent); }
-    .app:active { transform: translate(2px, 2px);   box-shadow: var(--shadow-soft), 2px 2px 0 var(--accent); }
-    .app:focus-visible { outline: 3px solid #bedaf2; outline-offset: 4px; }
-
-    .tape {
+    /* A pool of candlelight on the wall around each frame. */
+    .portrait::before {
+      content: '';
       position: absolute;
-      top: -14px;
-      width: 78px;
-      height: 24px;
-      background: var(--tape-color);
-      border: 1px dashed rgba(0,0,0,0.18);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      left: 50%;
+      top: -10%;
+      width: 160%;
+      height: 85%;
+      transform: translateX(-50%);
+      background: radial-gradient(closest-side, rgba(255, 190, 110, 0.14), transparent);
+      pointer-events: none;
     }
 
-    .glyph {
-      font-family: 'Patrick Hand', cursive;
-      font-size: 88px;
-      line-height: 1;
-      margin-bottom: 14px;
+    .frame {
+      position: relative;
+      width: 100%;
+      max-width: 320px;
+      padding: clamp(12px, 1.6vw, 18px);
+      background: var(--gilt-metal);
+      border-radius: 50% 50% 8px 8px / 40.5% 40.5% 8px 8px;
+      box-shadow:
+        inset 0 2px 1px rgba(255, 244, 210, 0.75),
+        inset 0 -2px 2px rgba(40, 26, 6, 0.85),
+        0 0 0 1px #2a1e08,
+        0 20px 34px rgba(0, 0, 0, 0.6),
+        0 4px 8px rgba(0, 0, 0, 0.5);
+      transition: box-shadow 0.35s ease;
     }
 
-    .glyph .ld {
-      display: inline-block;
-      border-left: 4px solid var(--ink);
-      border-top: 4px solid var(--ink);
-      border-top-left-radius: 22px 60px;
-      padding: 4px 6px 0 14px;
-      font-size: 64px;
+    .painting {
+      position: relative;
+      display: block;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      border-radius: 50% 50% 3px 3px / 40% 40% 3px 3px;
+      background: #0e1f2b;
+      box-shadow: 0 0 0 3px #3b2a0e, 0 0 0 5px rgba(243, 220, 151, 0.7);
     }
 
-    .name {
-      font-family: 'Patrick Hand', cursive;
-      font-size: 32px;
-      margin: 0 0 6px;
+    .painting img,
+    .painting svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
     }
 
-    .blurb {
-      color: var(--ink-soft);
-      margin: 0;
-      line-height: 1.4;
+    .painting img { filter: saturate(0.88) contrast(1.05) sepia(0.14); }
+
+    /* Varnish and vignette, so the comic panels read as oil on canvas. */
+    .painting::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 75% 65% at 50% 42%, transparent 50%, rgba(18, 10, 2, 0.6) 100%),
+        linear-gradient(180deg, rgba(255, 210, 140, 0.08), rgba(60, 30, 0, 0.12));
+    }
+
+    .plaque {
+      position: relative;
+      margin-top: 22px;
+      padding: 5px 20px 3px;
+      background: linear-gradient(180deg, #ecd28a 0%, #c8a04e 48%, #8a6726 100%);
+      border-radius: 3px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 244, 210, 0.85),
+        inset 0 -1px 0 rgba(40, 26, 6, 0.5),
+        0 3px 6px rgba(0, 0, 0, 0.6);
+      font-family: 'IM Fell English SC', 'IM Fell English', Georgia, serif;
+      font-size: clamp(22px, 2.3vw, 26px);
+      line-height: 1.2;
+      color: #2e2008;
+      text-shadow: 0 1px 0 rgba(255, 236, 180, 0.6);
+    }
+
+    .caption {
+      margin: 12px 0 0;
+      max-width: 24ch;
+      font-style: italic;
+      font-size: 19px;
+      line-height: 1.45;
+      color: rgba(234, 223, 196, 0.85);
+    }
+
+    /* Revelio: the portrait you reach for answers with a blue glow. */
+    .portrait:hover .frame,
+    .portrait:active .frame,
+    .portrait:focus-visible .frame {
+      box-shadow:
+        inset 0 2px 1px rgba(255, 244, 210, 0.75),
+        inset 0 -2px 2px rgba(40, 26, 6, 0.85),
+        0 0 0 2px rgba(143, 227, 239, 0.9),
+        0 0 36px 4px rgba(143, 227, 239, 0.5),
+        0 20px 34px rgba(0, 0, 0, 0.6);
+    }
+
+    .portrait:hover .painting img,
+    .portrait:hover .painting svg,
+    .portrait:active .painting img,
+    .portrait:active .painting svg,
+    .portrait:focus-visible .painting img,
+    .portrait:focus-visible .painting svg {
+      transform: scale(1.06);
+    }
+
+    .portrait:focus-visible { outline: none; }
+    .portrait:focus-visible .plaque { outline: 2px solid var(--revelio); outline-offset: 4px; }
+
+    /* ---------- Page-load Revelio pulse ---------- */
+
+    .revelio {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .revelio::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 58%;
+      width: 260vmax;
+      height: 260vmax;
+      border-radius: 50%;
+      background: radial-gradient(circle,
+        rgba(143, 227, 239, 0.05) 0%,
+        rgba(143, 227, 239, 0.07) 62%,
+        rgba(143, 227, 239, 0.35) 67.5%,
+        rgba(214, 250, 255, 0.85) 69%,
+        rgba(143, 227, 239, 0.35) 70.5%,
+        transparent 72%);
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      animation: revelio-pulse 2s cubic-bezier(0.3, 0.25, 0.45, 1) 0.3s both;
+    }
+
+    @keyframes revelio-pulse {
+      0%   { transform: translate(-50%, -50%) scale(0.01); opacity: 1; }
+      70%  { opacity: 0.9; }
+      100% { transform: translate(-50%, -50%) scale(1);    opacity: 0; }
+    }
+
+    /* Delays track the moment the ring crosses each portrait. */
+    .portrait .painting { animation: portrait-wake 0.6s ease-out both; }
+    .portrait .frame    { animation: frame-glint 1.2s ease-out both; }
+    .portrait:nth-child(2) .painting,
+    .portrait:nth-child(2) .frame { animation-delay: 0.4s; }
+    .portrait:nth-child(1) .painting,
+    .portrait:nth-child(1) .frame,
+    .portrait:nth-child(3) .painting,
+    .portrait:nth-child(3) .frame { animation-delay: 0.62s; }
+
+    @keyframes portrait-wake {
+      from { filter: brightness(0.22) saturate(0.3); }
+      to   { filter: none; }
+    }
+
+    @keyframes frame-glint {
+      0% {
+        box-shadow:
+          inset 0 2px 1px rgba(255, 244, 210, 0.75),
+          inset 0 -2px 2px rgba(40, 26, 6, 0.85),
+          0 0 0 1px #2a1e08,
+          0 20px 34px rgba(0, 0, 0, 0.6),
+          0 4px 8px rgba(0, 0, 0, 0.5);
+      }
+      30% {
+        box-shadow:
+          inset 0 2px 1px rgba(255, 244, 210, 0.75),
+          inset 0 -2px 2px rgba(40, 26, 6, 0.85),
+          0 0 0 2px rgba(143, 227, 239, 0.9),
+          0 0 40px 6px rgba(143, 227, 239, 0.55),
+          0 4px 8px rgba(0, 0, 0, 0.5);
+      }
+      100% {
+        box-shadow:
+          inset 0 2px 1px rgba(255, 244, 210, 0.75),
+          inset 0 -2px 2px rgba(40, 26, 6, 0.85),
+          0 0 0 1px #2a1e08,
+          0 20px 34px rgba(0, 0, 0, 0.6),
+          0 4px 8px rgba(0, 0, 0, 0.5);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .revelio { display: none; }
+      .portrait .painting,
+      .portrait .frame { animation: none; }
+      .painting img, .painting svg, .frame { transition: none; }
+    }
+
+    /* ---------- Narrow screens: one portrait above the next ---------- */
+
+    @media (max-width: 720px) {
+      .gallery {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 48px;
+      }
+      .frame { max-width: min(300px, 80vw); }
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <h1 class="title">Marcus's Math Apps</h1>
+  <div class="revelio" aria-hidden="true"></div>
 
-    <nav class="apps">
-      <a class="app" href="division.html">
-        <span class="tape" style="--tape-color: rgba(255, 220, 130, 0.7); right: 28px; transform: rotate(-3deg);"></span>
-        <span class="glyph" aria-hidden="true">÷</span>
-        <h2 class="name">Division</h2>
-        <p class="blurb">Help Clay with partial quotients.</p>
+  <main class="hall">
+    <h1 class="title">Marcus’s Arithmancy</h1>
+    <p class="invite">Tap a portrait to step inside.</p>
+
+    <nav class="gallery" aria-label="Math apps">
+      <a class="portrait" href="division.html">
+        <span class="frame">
+          <span class="painting">
+            <img src="portraits/clay.jpg" alt="Portrait of Clay the MudWing" width="640" height="800" />
+          </span>
+        </span>
+        <span class="plaque">Division</span>
+        <span class="caption">Help Clay with partial quotients.</span>
       </a>
 
-      <a class="app" href="longdivision.html">
-        <span class="tape" style="--tape-color: rgba(190, 218, 242, 0.75); left: 28px; transform: rotate(2.5deg);"></span>
-        <span class="glyph" aria-hidden="true"><span class="ld">12</span></span>
-        <h2 class="name">Long Division</h2>
-        <p class="blurb">Divide step by step.</p>
+      <a class="portrait" href="longdivision.html">
+        <span class="frame">
+          <span class="painting">
+            <svg viewBox="0 0 400 500" role="img" aria-label="A long division worked in gold ink">
+              <defs>
+                <radialGradient id="ld-field" cx="50%" cy="45%" r="75%">
+                  <stop offset="0" stop-color="#1f4658" />
+                  <stop offset="1" stop-color="#0b1822" />
+                </radialGradient>
+                <filter id="ld-glow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="2.4" result="b" />
+                  <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+              </defs>
+              <rect width="400" height="500" fill="url(#ld-field)" />
+
+              <g fill="none" stroke="#e0c070" stroke-opacity="0.16" stroke-width="1.5">
+                <circle cx="210" cy="312" r="172" />
+                <circle cx="210" cy="312" r="146" stroke-dasharray="2 9" />
+              </g>
+
+              <g filter="url(#ld-glow)" font-family="'IM Fell English', Georgia, serif" font-size="52">
+                <g fill="#ecd28a" text-anchor="middle">
+                  <text x="236" y="176">1</text><text x="272" y="176">3</text>
+                  <text x="166" y="244" text-anchor="end">12</text>
+                  <text x="200" y="244">1</text><text x="236" y="244">5</text><text x="272" y="244">6</text>
+                  <text x="200" y="300">1</text><text x="236" y="300">2</text>
+                  <text x="236" y="368">3</text><text x="272" y="368">6</text>
+                  <text x="236" y="420">3</text><text x="272" y="420">6</text>
+                  <text x="272" y="484">0</text>
+                </g>
+                <g fill="none" stroke="#ecd28a" stroke-linecap="round">
+                  <path d="M174 256 C 186 232, 186 212, 178 190 L 292 190" stroke-width="3" />
+                  <path d="M182 314 L 254 314" stroke-width="2.4" />
+                  <path d="M218 434 L 290 434" stroke-width="2.4" />
+                </g>
+              </g>
+            </svg>
+          </span>
+        </span>
+        <span class="plaque">Long Division</span>
+        <span class="caption">Divide step by step.</span>
       </a>
 
-      <a class="app" href="multiplication.html">
-        <span class="tape" style="--tape-color: rgba(197, 237, 203, 0.8); right: 28px; transform: rotate(-2deg);"></span>
-        <span class="glyph" aria-hidden="true">×</span>
-        <h2 class="name">Multiplication Table</h2>
-        <p class="blurb">Help Tsunami fill in the table.</p>
+      <a class="portrait" href="multiplication.html">
+        <span class="frame">
+          <span class="painting">
+            <img src="portraits/tsunami.jpg" alt="Portrait of Tsunami the SeaWing" width="640" height="800" />
+          </span>
+        </span>
+        <span class="plaque">Multiplication Table</span>
+        <span class="caption">Help Tsunami fill in the table.</span>
       </a>
     </nav>
-  </div>
+  </main>
 </body>
 </html>
