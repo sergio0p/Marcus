@@ -41,6 +41,17 @@ html, body {
   pointer-events: none;
 }
 
+/* Upright phones: Tsunami moves to the top so the bubble can sit below
+   her at full width. Keep in sync with STACKED in mult-app.js. */
+@media (max-width: 699px) and (orientation: portrait) {
+  .tsunami {
+    top: max(5vh, 20px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(92vw, 560px);
+  }
+}
+
 /* SVG covers the whole viewport; the callout group is drawn in
    user coords inside a 1000x1000 viewBox (preserveAspectRatio meet). */
 .callout-layer {
@@ -65,7 +76,7 @@ html, body {
   color: #000;
   padding: 22px 28px;
   text-align: center;
-  word-wrap: break-word;
+  overflow-wrap: normal;  /* mult-app.js fitText() shrinks instead */
   /* Center text vertically and horizontally within the bubble. */
   height: 100%;
   display: flex;
@@ -75,6 +86,14 @@ html, body {
 /* First callout: text 20% bigger than the rest, bubble unchanged. */
 .callout .bubble-text.big {
   font-size: 37px;
+}
+
+/* Phones: slimmer padding inside the bubble. */
+@media (max-width: 699px) and (orientation: portrait) {
+  .callout .bubble-text { padding: 14px 16px; }
+}
+@media (max-height: 599px) and (orientation: landscape) {
+  .callout .bubble-text { padding: 12px 16px; }
 }
 
 /* Callout group accepts clicks (skips the timer). */

@@ -11,7 +11,7 @@
   // colorCycle: list of {color, hold} states. After last state, advance.
   const CALLOUTS = [
     {
-      html: 'Argh !!! I am mad !<br/>Why am I mad ???',
+      html: 'Argh&nbsp;!!! I am mad&nbsp;!<br/>Why am I mad&nbsp;???',
       bigText: true,
       colorCycle: [
         { color: '#d6453d', hold: 5000 },
@@ -25,7 +25,7 @@
       colorCycle: [{ color: '#000000', hold: 9000 }],
     },
     {
-      html: 'Please Marcus, Clay told me you have fun with math. Please, pretty please, help me!',
+      html: 'Please Marcus, Clay told me you have fun with math. Please, pretty please, help&nbsp;me!',
       colorCycle: [{ color: '#000000', hold: 7500 }],
     },
   ];
@@ -40,6 +40,10 @@
 
   let idx = 0;          // current callout index
   let cycleTimer = null;
+
+  // Upright phones: Tsunami on top, bubble underneath. Must match the
+  // media query that moves her in mult-style.css.
+  const STACKED = window.matchMedia('(max-width: 699px) and (orientation: portrait)');
 
   /* ---------- bubble path ---------- */
 
@@ -69,6 +73,30 @@
     ].join(' ');
   }
 
+  // Same bubble with the tail on the top edge, for the stacked layout.
+  function bubblePathTop(mouth, b, r = 24) {
+    const tailLx = Math.max(b.x + r + 10, Math.min(mouth.x - 35, b.x + b.w - r - 80));
+    const tailRx = tailLx + 70;
+    const ctrl1 = { x: tailLx + 40, y: b.y - 60 };
+    const ctrl2 = { x: tailRx - 40, y: b.y - 60 };
+
+    return [
+      `M ${b.x + r} ${b.y}`,
+      `L ${tailLx} ${b.y}`,
+      `Q ${ctrl1.x} ${ctrl1.y} ${mouth.x} ${mouth.y}`,
+      `Q ${ctrl2.x} ${ctrl2.y} ${tailRx} ${b.y}`,
+      `L ${b.x + b.w - r} ${b.y}`,
+      `Q ${b.x + b.w} ${b.y} ${b.x + b.w} ${b.y + r}`,
+      `L ${b.x + b.w} ${b.y + b.h - r}`,
+      `Q ${b.x + b.w} ${b.y + b.h} ${b.x + b.w - r} ${b.y + b.h}`,
+      `L ${b.x + r} ${b.y + b.h}`,
+      `Q ${b.x} ${b.y + b.h} ${b.x} ${b.y + b.h - r}`,
+      `L ${b.x} ${b.y + r}`,
+      `Q ${b.x} ${b.y} ${b.x + r} ${b.y}`,
+      'Z',
+    ].join(' ');
+  }
+
   /* ---------- layout / draw ---------- */
 
   function computeGeometry() {
@@ -81,23 +109,56 @@
       y: r.top  + r.height * MOUTH_FY,
     };
 
+    if (STACKED.matches) {
+      // Leave room above for the tail and below for the help button.
+      const margin = W * 0.04;
+      const bubbleY = r.bottom + 44;
+      const bubbleH = Math.max(160, Math.min(H - 96 - bubbleY, W * 0.85));
+      return {
+        W, H,
+        mouth,
+        tail: 'top',
+        bubble: { x: margin, y: bubbleY, w: W - 2 * margin, h: bubbleH },
+      };
+    }
+
     // Bubble: positioned to the right of the image, centered on the
     // image's vertical band so the tail doesn't shoot diagonally across.
     const gap = Math.max(24, W * 0.04);
     const bubbleX = Math.min(r.right + gap, W * 0.46);
     const bubbleW = W - bubbleX - W * 0.04;
-    const bubbleH = Math.min(H * 0.7, Math.max(r.height * 1.4, 320));
+    const bubbleH = Math.min(H * 0.7, H - (H < 600 ? 76 : H * 0.04) - H * 0.04,
+                             Math.max(r.height * 1.4, 320));
     const imgCenterY = r.top + r.height / 2;
     let bubbleY = imgCenterY - bubbleH / 2;
     const minY = H * 0.04;
-    const maxY = H - bubbleH - H * 0.04;
+    // On short screens keep the bottom clear for the help button.
+    const bottomRoom = H < 600 ? 76 : H * 0.04;
+    const maxY = H - bubbleH - bottomRoom;
     bubbleY = Math.max(minY, Math.min(maxY, bubbleY));
 
     return {
       W, H,
       mouth,
+      tail: 'left',
       bubble: { x: bubbleX, y: bubbleY, w: bubbleW, h: bubbleH },
     };
+  }
+
+  // Shrink the bubble text until it fits (desktop sizes already do, so
+  // only small screens change). Words stay whole: overflow-wrap is off in
+  // the CSS, so a word too long for the line shows up as scrollWidth.
+  function fitText() {
+    const t = document.getElementById('bubble-text');
+    if (!t) return;
+    t.style.fontSize = '';
+    let size = parseFloat(getComputedStyle(t).fontSize);
+    const overflows = () =>
+      t.scrollHeight > t.clientHeight + 1 || t.scrollWidth > t.clientWidth + 1;
+    while (size > 14 && overflows()) {
+      size -= 1;
+      t.style.fontSize = size + 'px';
+    }
   }
 
   function draw() {
@@ -105,9 +166,12 @@
     els.svg.setAttribute('viewBox', `0 0 ${geom.W} ${geom.H}`);
 
     const data = CALLOUTS[idx];
-    const path = bubblePath(geom.mouth, geom.bubble);
-    const padX = 36;
-    const padY = 28;
+    const path = geom.tail === 'top'
+      ? bubblePathTop(geom.mouth, geom.bubble)
+      : bubblePath(geom.mouth, geom.bubble);
+    const small = geom.W < 700 || geom.H < 600;
+    const padX = small ? 14 : 36;
+    const padY = small ? 12 : 28;
 
     const textCls = 'bubble-text' + (data.bigText ? ' big' : '');
     els.callout.innerHTML = `
@@ -122,6 +186,7 @@
         </div>
       </foreignObject>
     `;
+    fitText();
   }
 
   /* ---------- sequencing ---------- */
@@ -186,6 +251,10 @@
     draw();
     // Re-apply red class if currently red.
   });
+
+  // Augie may arrive after the first fit; refit without redrawing so the
+  // colour cycle keeps its current colour.
+  if (document.fonts) document.fonts.ready.then(fitText);
 
   // Wait for image to load so getBoundingClientRect is accurate.
   if (els.tsunami.complete) {
